@@ -1,2 +1,2 @@
 # pyzil
-Zilliqa Python API
+Zilliqa Python Library
