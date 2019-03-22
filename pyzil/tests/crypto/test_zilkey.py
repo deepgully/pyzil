@@ -92,6 +92,15 @@ class TestZilKey:
             from_public = crypto.ZilKey(public_key=addr["public"]).address
             assert from_public == from_file
 
+    def test_checksum_address(self):
+        addresses = load_ts_fixtures(path_join("checksum.fixtures.ts"))
+        for addr in addresses:
+            original = addr["original"]
+            checksum_addr = crypto.zilkey.to_checksum_address(original)
+            assert checksum_addr == addr["zil"]
+            assert checksum_addr == "0x" + addr["zil_no0x"]
+            assert checksum_addr != addr["eth"]
+
     def test_keypairs(self):
         keypairs = load_ts_fixtures(path_join("keypairs.fixtures.ts"))
         for pair in keypairs:
@@ -100,3 +109,17 @@ class TestZilKey:
 
             assert key_from_private.encoded_public_key == key_from_public.encoded_public_key
 
+    def test_keystore(self):
+        key_file = path_join("zilliqa_keystore.json")
+        key = crypto.ZilKey.load_keystore("zxcvbnm,", key_file)
+        checksum_address = crypto.zilkey.to_checksum_address("526a2719b5855ef7d396a62b912a0dfa08e6ae63")
+        assert checksum_address == key.checksum_address
+
+        keystore = key.save_keysotre("1234", keystore_file=path_join("zilliqa_keystore2.json"))
+        assert keystore["address"] == key.address
+        key_file2 = path_join("zilliqa_keystore2.json")
+        key2 = crypto.ZilKey.load_keystore("1234", key_file2)
+        assert key == key2
+
+        with pytest.raises(ValueError):
+            crypto.ZilKey.load_keystore("12345", key_file2)

@@ -12,7 +12,7 @@ This module implements the cryptographic methods
 :license: MIT License, see LICENSE for more details.
 """
 
-__all__ = ["ZilKey", "KeyPair"]
+__all__ = ["zilkey", "ZilKey", "KeyPair"]
 
-
+from . import zilkey
 from .zilkey import ZilKey, KeyPair

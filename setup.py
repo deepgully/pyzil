@@ -15,7 +15,8 @@ package_data = {"pyzil": ["tests/*"]}
 tests_require = ["pytest"]
 install_requires = [
     "requests", "jsonrpcclient", "jsonrpcclient[requests]",
-    "protobuf", "fastecdsa", "pyethash", "eth-hash[pycryptodome]",
+    "protobuf", "fastecdsa", "pyethash",
+    "pycryptodome", "eth-hash[pycryptodome]",
 ]
 
 setup(

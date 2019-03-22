@@ -12,7 +12,9 @@ Zilliqa Key
 :license: MIT License, see LICENSE for more details.
 """
 
-from typing import Union
+import json
+import uuid
+from typing import Union, Optional
 from collections import namedtuple
 
 from pyzil.common import utils
@@ -24,11 +26,53 @@ ADDRESS_NUM_BYTES = 20
 ADDRESS_STR_LENGTH = ADDRESS_NUM_BYTES * 2
 
 
+def is_valid_address(address: str) -> bool:
+    """Return True if address is valid."""
+    if address.lower().startswith("0x"):
+        address = address[2:]
+    if len(address) != ADDRESS_STR_LENGTH:
+        return False
+    # noinspection PyBroadException
+    try:
+        utils.hex_str_to_int(address)
+    except Exception:
+        return False
+    return True
+
+
+def to_checksum_address(address: str, prefix="0x") -> Optional[str]:
+    """Convert address to checksum address."""
+    if not is_valid_address(address):
+        return None
+
+    address = address.lower().replace("0x", "")
+    address_bytes = utils.hex_str_to_bytes(address)
+    v = utils.bytes_to_int(tools.hash256_bytes(address_bytes))
+
+    checksum_address = prefix
+    for i, c in enumerate(address):
+        if not c.isdigit():
+            if v & (1 << 255 - 6 * i):
+                c = c.upper()
+            else:
+                c = c.lower()
+        checksum_address += c
+
+    return checksum_address
+
+
+def is_valid_checksum_address(address: str) -> bool:
+    """Return True if address is valid checksum address."""
+    if not is_valid_address(address):
+        return False
+    return to_checksum_address(address) == address
+
+
 KeyPair = namedtuple("KeyPair", ["public", "private"])
 
 
 class ZilKey:
-    """ ZIlliqa Key """
+    """ Zilliqa Key """
     def __init__(self, public_key=None, private_key=None):
         assert public_key or private_key, "public or private key is required"
         if isinstance(public_key, str):
@@ -63,48 +107,40 @@ class ZilKey:
 
     @property
     def encoded_public_key(self):
+        """bytes of public key."""
         return schnorr.encode_public(self._public_key.x, self._public_key.y)
 
     @property
     def encoded_private_key(self):
+        """bytes of private key."""
         return self._private_key and utils.int_to_bytes(self._private_key)
 
     @property
     def keypair_bytes(self) -> KeyPair:
+        """bytes of key pair."""
         return KeyPair(self.encoded_public_key, self.encoded_private_key)
 
     @property
     def keypair_str(self) -> KeyPair:
+        """hex string of key pair."""
         str_pub = utils.bytes_to_hex_str(self.encoded_public_key)
         str_private = self._private_key and utils.int_to_hex_str(self._private_key)
         return KeyPair(str_pub, str_private)
 
     @property
     def address(self) -> str:
-        return tools.hash256_str(self.keypair_bytes.public)[-ADDRESS_STR_LENGTH:]
+        addr_bytes = tools.hash256_bytes(self.keypair_bytes.public)
+        return utils.bytes_to_hex_str(addr_bytes)[-ADDRESS_STR_LENGTH:]
+
+    @property
+    def checksum_address(self) -> str:
+        return to_checksum_address(self.address)
 
     def __str__(self):
         return str(self.keypair_str)
 
     def __eq__(self, other):
         return self._public_key == other._public_key and self._private_key == other._private_key
-
-    @classmethod
-    def generate_new(cls):
-        """generate new zilliqa key"""
-        zil_key = cls(private_key=utils.int_to_bytes(schnorr.gen_private_key()))
-        return zil_key
-
-    @classmethod
-    def load_mykey_txt(cls, key_file="mykey.txt"):
-        with open(key_file, "r") as f:
-            str_pub, str_private = f.read().split()
-            return ZilKey(public_key=str_pub, private_key=str_private)
-
-    def save_mykey_txt(self, key_file="mykey.txt"):
-        with open(key_file, "w") as f:
-            str_pub, str_private = self.keypair_str
-            f.write(str_pub.upper() + " " + str_private.upper())
 
     # Zilliqa schnorr signature
     def sign(self, message: bytes) -> bytes:
@@ -129,3 +165,106 @@ class ZilKey:
         message = utils.ensure_bytes(message)
 
         return schnorr.verify(message, signature, self.keypair_bytes.public)
+
+    @classmethod
+    def generate_new(cls):
+        """Generate new zilliqa key"""
+        zil_key = cls(private_key=utils.int_to_bytes(schnorr.gen_private_key()))
+        return zil_key
+
+    @classmethod
+    def load_mykey_txt(cls, key_file="mykey.txt"):
+        """Load Zilliqa key from mykey.txt."""
+        with open(key_file, "r") as f:
+            str_pub, str_private = f.read().split()
+            return ZilKey(public_key=str_pub, private_key=str_private)
+
+    def save_mykey_txt(self, key_file="mykey.txt"):
+        """Save key to mykey.txt."""
+        with open(key_file, "w") as f:
+            str_pub, str_private = self.keypair_str
+            f.write(str_pub.upper() + " " + str_private.upper())
+
+    @classmethod
+    def load_keystore(cls, password: str, keystore_file):
+        """Load Zilliqa key from keystore json file."""
+        if hasattr(keystore_file, "read"):
+            keystore = json.load(keystore_file)
+        else:
+            with open(keystore_file) as f:
+                keystore = json.load(f)
+
+        checksum_address = to_checksum_address(keystore["address"])
+        ciphertext = utils.hex_str_to_bytes(keystore["crypto"]["ciphertext"])
+        iv = utils.hex_str_to_bytes(keystore["crypto"]["cipherparams"]["iv"])
+
+        kdf_method = keystore["crypto"]["kdf"]
+        kdfparams = keystore["crypto"]["kdfparams"]
+
+        derived_key = tools.gen_derived_key(password, kdf_method, kdfparams)
+
+        cipher = keystore["crypto"]["cipher"].encode()
+        message = derived_key[16:32] + ciphertext + iv + cipher
+        mac_generated = tools.hmac_hash256(derived_key, msg=message)
+
+        mac_from_file = utils.hex_str_to_bytes(keystore["crypto"]["mac"])
+        if not tools.compare_digest(mac_generated, mac_from_file):
+            raise ValueError("Invalid password or keystore file")
+
+        key = derived_key[:16]
+        private_key = tools.aes_ctr_decrypt(key, iv, ciphertext)
+        zilkey = cls(private_key=private_key)
+        if not tools.compare_digest(checksum_address, zilkey.checksum_address):
+            raise ValueError("Invalid keystore file, address mismatch")
+        return zilkey
+
+    def save_keysotre(self, password: str, kdf_method: str="pbkdf2",
+                      keystore_file=None) -> dict:
+        """Save Zilliqa key to keystore, format details on
+        https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition.
+        """
+        address = self.address
+        cipher = "aes-128-ctr"
+        salt = utils.rand_bytes(32)
+        iv = utils.rand_bytes(16)
+        kdfparams = {
+            "salt": utils.bytes_to_hex_str(salt),
+            "n": 8192,
+            "c": 262144,
+            "r": 8,
+            "p": 1,
+            "dklen": 32
+        }
+        derived_key = tools.gen_derived_key(password, kdf_method, kdfparams)
+
+        key = derived_key[:16]
+        ciphertext = tools.aes_ctr_encrypt(key, iv,
+                                           ciphertext=self.encoded_private_key)
+        cipher_bytes = cipher.encode()
+        message = derived_key[16:32] + ciphertext + iv + cipher_bytes
+        mac_generated = tools.hmac_hash256(derived_key, msg=message)
+
+        keystore = {
+            "address": address,
+            "crypto": {
+                "cipher": cipher,
+                "cipherparams": {
+                    "iv": utils.bytes_to_hex_str(iv),
+                },
+                "ciphertext": utils.bytes_to_hex_str(ciphertext),
+                "kdf": kdf_method,
+                "kdfparams": kdfparams,
+                "mac": utils.bytes_to_hex_str(mac_generated),
+            },
+            "id": str(uuid.uuid4()),
+            "version": 3,
+        }
+
+        if keystore_file is None:
+            return keystore
+        if hasattr(keystore_file, "write"):
+            json.dump(keystore, keystore_file)
+        else:
+            with open(keystore_file, "w") as f:
+                json.dump(keystore, f)
+        return keystore
