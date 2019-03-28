@@ -40,6 +40,16 @@ def is_valid_address(address: str) -> bool:
     return True
 
 
+def to_valid_address(address: str) -> Optional[str]:
+    """Return lower case address if address is valid."""
+    if not is_valid_address(address):
+        return None
+    address = address.lower()
+    if address.startswith("0x"):
+        address = address[2:]
+    return address
+
+
 def to_checksum_address(address: str, prefix="0x") -> Optional[str]:
     """Convert address to checksum address."""
     if not is_valid_address(address):
