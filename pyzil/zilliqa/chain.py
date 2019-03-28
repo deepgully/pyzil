@@ -12,7 +12,29 @@ Zilliqa Blockchain.
 :license: MIT License, see LICENSE for more details.
 """
 
+from pyzil.common.local import LocalProxy
 from pyzil.zilliqa.api import ZilliqaAPI
+
+
+class BlockChainError(Exception):
+    pass
+
+
+_active_chain = None
+
+
+def get_active_chain():
+    if _active_chain is None:
+        raise BlockChainError("active chain is not set, please call set_active_chain first")
+    return _active_chain
+
+
+def set_active_chain(chain):
+    global _active_chain
+    _active_chain = chain
+
+
+active_chain = LocalProxy(get_active_chain)
 
 
 class BlockChain:
@@ -22,6 +44,9 @@ class BlockChain:
         self.network_id = network_id
         self.api = ZilliqaAPI(endpoint=self.api_url)
 
+    def __str__(self):
+        return "<BlockChain: {}>".format(self.api_url)
+
 
 TestNet = BlockChain("https://dev-api.zilliqa.com/",
                      version=21823489, network_id=333)
@@ -29,3 +54,11 @@ TestNet = BlockChain("https://dev-api.zilliqa.com/",
 
 MainNet = BlockChain("https://api.zilliqa.com/",
                      version=65537, network_id=1)
+
+
+if "__main__" == __name__:
+    print(TestNet.api.GetCurrentMiniEpoch())
+    print(TestNet.api.GetCurrentDSEpoch())
+    print(TestNet.api.GetBalance("b50c2404e699fd985f71b2c3f032059f13d6543b"))
+    print(TestNet.api.GetBalance("4BAF5faDA8e5Db92C3d3242618c5B47133AE003C"))
+    print(TestNet.api.GetBalance("4BAF5faDA8e5Db92C3d3242618c5B47133AE003C"))
