@@ -12,7 +12,12 @@ Json-RPC interface of Zilliqa APIs.
 :license: MIT License, see LICENSE for more details.
 """
 
+from jsonrpcclient.exceptions import JsonRpcClientError
 from jsonrpcclient.clients.http_client import HTTPClient
+
+
+class APIError(Exception):
+    pass
 
 
 class ZilliqaAPI:
@@ -36,10 +41,13 @@ class ZilliqaAPI:
         if len(params) == 1 and (isinstance(params[0], (dict, list))):
             params = (list(params), )
 
-        return self.api_client.request(
-            method_name, *params,
-            trim_log_values=True, **kwargs
-        )
+        try:
+            return self.api_client.request(
+                method_name, *params,
+                trim_log_values=True, **kwargs
+            )
+        except JsonRpcClientError as e:
+            raise APIError(e)
 
 
 if "__main__" == __name__:
