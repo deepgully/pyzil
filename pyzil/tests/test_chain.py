@@ -12,6 +12,7 @@ from pyzil.zilliqa.chain import active_chain
 
 class TestChain:
     def test_active_chain(self):
+        chain.set_active_chain(None)
         with pytest.raises(chain.BlockChainError):
             active_chain.api.GetCurrentDSEpoch()
 

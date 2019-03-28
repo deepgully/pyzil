@@ -31,7 +31,7 @@ def get_active_chain() -> "BlockChain":
     return _active_chain
 
 
-def set_active_chain(chain: "BlockChain") -> None:
+def set_active_chain(chain: Optional["BlockChain"]) -> None:
     global _active_chain
     _active_chain = chain
 

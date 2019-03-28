@@ -6,6 +6,7 @@
 import pytest
 
 from pyzil.crypto import zilkey
+from pyzil.zilliqa import chain
 from pyzil.account import Account
 
 
@@ -67,4 +68,19 @@ class TestAccount:
             account = Account.from_keystore("123", path_join("crypto", "zilliqa_keystore2.json"))
             assert account and account.address == "526a2719b5855ef7d396a62b912a0dfa08e6ae63"
 
+    def test_balance(self):
+        account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
+        print("set active chain to TestNet")
+        chain.set_active_chain(chain.TestNet)
+        balance = account.get_balance()
+        print("balance", balance)
+        assert balance > 0
 
+        nonce = account.get_nonce()
+        print("nonce", nonce)
+        assert nonce >= 3
+
+        account2 = Account(address="b50c2404e699fd985f71b2c3f032059f13d65432")
+        balance = account2.get_balance()
+        print("balance", balance)
+        assert balance == 0

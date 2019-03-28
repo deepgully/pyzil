@@ -13,7 +13,11 @@ Zilliqa Account
 """
 
 from typing import Optional
+
 from pyzil.crypto import zilkey
+from pyzil.zilliqa.api import APIError
+from pyzil.zilliqa.chain import active_chain
+from pyzil.zilliqa.units import Qa, Zil
 
 
 class Account:
@@ -88,3 +92,24 @@ class Account:
         """Load account from keystore json file."""
         zil_key = zilkey.ZilKey.load_keystore(password, keystore_file)
         return cls.from_zilkey(zil_key)
+
+    def get_balance_nonce(self) -> dict:
+        """Return raw response of GetBalance."""
+        resp = {"balance": 0, "nonce": 0}
+        try:
+            resp = active_chain.api.GetBalance(self.address)
+        except APIError as e:
+            if str(e) != "Account is not created":
+                raise e
+        return resp
+
+    def get_balance(self) -> Zil:
+        """Return account balance in Zil."""
+        resp = self.get_balance_nonce()
+        return Qa(resp["balance"]).toZil()
+
+    def get_nonce(self) -> int:
+        """Return account nonce."""
+        resp = self.get_balance_nonce()
+        return int(resp["nonce"])
+
