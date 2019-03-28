@@ -12,6 +12,8 @@ Zilliqa Blockchain.
 :license: MIT License, see LICENSE for more details.
 """
 
+from typing import Union, Optional
+
 from pyzil.common.local import LocalProxy
 from pyzil.zilliqa.api import ZilliqaAPI
 
@@ -20,16 +22,16 @@ class BlockChainError(Exception):
     pass
 
 
-_active_chain = None
+_active_chain: Optional["BlockChain"] = None
 
 
-def get_active_chain():
+def get_active_chain() -> "BlockChain":
     if _active_chain is None:
         raise BlockChainError("active chain is not set, please call set_active_chain first")
     return _active_chain
 
 
-def set_active_chain(chain):
+def set_active_chain(chain: "BlockChain") -> None:
     global _active_chain
     _active_chain = chain
 
@@ -38,7 +40,8 @@ active_chain = LocalProxy(get_active_chain)
 
 
 class BlockChain:
-    def __init__(self, api_url, version, network_id):
+    """Zilliqa Block Chain."""
+    def __init__(self, api_url: str, version: Union[str, int], network_id: Union[str, int]):
         self.api_url = api_url
         self.version = version
         self.network_id = network_id

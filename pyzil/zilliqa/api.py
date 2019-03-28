@@ -21,8 +21,9 @@ class APIError(Exception):
 
 
 class ZilliqaAPI:
+    """Json-RPC interface of Zilliqa APIs."""
     class APIMethod:
-        def __init__(self, api, method_name):
+        def __init__(self, api: "ZilliqaAPI", method_name: str):
             self.api = api
             self.method_name = method_name
 
@@ -30,14 +31,14 @@ class ZilliqaAPI:
             resp = self.api.call(self.method_name, *params, **kwargs)
             return resp and resp.data and resp.data.result
 
-    def __init__(self, endpoint):
+    def __init__(self, endpoint: str):
         self.endpoint = endpoint
         self.api_client = HTTPClient(self.endpoint)
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str):
         return ZilliqaAPI.APIMethod(self, method_name=item)
 
-    def call(self, method_name, *params, **kwargs):
+    def call(self, method_name: str, *params, **kwargs):
         if len(params) == 1 and (isinstance(params[0], (dict, list))):
             params = (list(params), )
 
@@ -51,10 +52,10 @@ class ZilliqaAPI:
 
 
 if "__main__" == __name__:
-    api = ZilliqaAPI("https://dev-api.zilliqa.com/")
-    print(api.GetCurrentMiniEpoch())
-    print(api.GetCurrentDSEpoch())
-    print(api.GetBalance("b50c2404e699fd985f71b2c3f032059f13d6543b"))
-    print(api.GetBalance("4BAF5faDA8e5Db92C3d3242618c5B47133AE003C"))
-    print(api.GetBalance("4BAF5faDA8e5Db92C3d3242618c5B47133AE003C"))
+    _api = ZilliqaAPI("https://dev-api.zilliqa.com/")
+    print(_api.GetCurrentMiniEpoch())
+    print(_api.GetCurrentDSEpoch())
+    print(_api.GetBalance("b50c2404e699fd985f71b2c3f032059f13d6543b"))
+    print(_api.GetBalance("4BAF5faDA8e5Db92C3d3242618c5B47133AE003C"))
+    print(_api.GetBalance("4BAF5faDA8e5Db92C3d3242618c5B47133AE003C"))
 
