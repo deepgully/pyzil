@@ -74,7 +74,6 @@ class TestAPI:
 
         txn_rate = api.GetTransactionRate()
         pprint(txn_rate)
-        assert txn_rate
 
         tx_block = api.GetCurrentMiniEpoch()
         pprint(tx_block)
