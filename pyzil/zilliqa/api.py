@@ -39,8 +39,9 @@ class ZilliqaAPI:
         return ZilliqaAPI.APIMethod(self, method_name=item)
 
     def call(self, method_name: str, *params, **kwargs):
-        if len(params) == 1 and (isinstance(params[0], (dict, list))):
-            params = (list(params), )
+        # fixme: fix for jsonrpcclient < 3.3.1
+        # if len(params) == 1 and (isinstance(params[0], (dict, list))):
+        #     params = (list(params), )
 
         try:
             return self.api_client.request(

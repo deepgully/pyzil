@@ -15,12 +15,12 @@ Zilliqa currencies units.
 
 class Units:
     prec = 12
-    fmt = ".12g"
+    fmt = "{:.12f}"
     units = pow(10, prec)
 
 
 class Qa(int):
-    def __str__(self):
+    def __repr__(self):
         return "{} Qa".format(int(self))
 
     def toZil(self):
@@ -87,12 +87,11 @@ class Qa(int):
 
 class Zil(float):
     def __str__(self):
-        fmt_str = "{{0:{}}}".format(Units.fmt)
-        dec_str = fmt_str.format(float(self))
-        return "{} Zil".format(dec_str)
+        fmt_str = Units.fmt.format(float(self))
+        return fmt_str.rstrip("0").rstrip(".")
 
     def __repr__(self):
-        return self.__str__()
+        return self.__str__() + " Zil"
 
     def __eq__(self, other):
         if not isinstance(other, Qa):

@@ -4,10 +4,12 @@
 # MIT License
 
 import pytest
+from pprint import pprint
 
 from pyzil.crypto import zilkey
 from pyzil.zilliqa import chain
-from pyzil.account import Account
+from pyzil.account import Account, BatchTransfer
+from pyzil.zilliqa.units import Zil, Qa
 
 
 def path_join(*path):
@@ -84,3 +86,94 @@ class TestAccount:
         balance = account2.get_balance()
         print("balance", balance)
         assert balance == 0
+
+        account3 = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
+        balance = account3.get_balance()
+        print("balance", balance)
+        assert balance > 0
+
+    def test_transfer(self):
+        chain.set_active_chain(chain.TestNet)
+
+        account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
+        print(account)
+        balance1 = account.get_balance()
+        print("Account1 balance", balance1)
+        with pytest.raises(RuntimeError):
+            account.transfer("to_addr", 1)
+
+        account2 = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
+        print(account2)
+        balance = account2.get_balance()
+        print("Account2 balance", balance)
+        assert balance > 0
+
+        to_addr = account.address
+        with pytest.raises(ValueError):
+            account2.transfer(to_addr, 50000)
+
+        txn_info = account2.transfer(to_addr, Zil(10.3))
+        pprint(txn_info)
+
+        txn_details = account2.wait_txn_confirm(txn_info["TranID"], timeout=120)
+        pprint(txn_details)
+        assert txn_details
+
+        balance2 = account.get_balance()
+        print("Account1 balance", balance2)
+        assert balance2 >= balance1 + 10.3
+
+    def test_batch_transfer(self):
+        chain.set_active_chain(chain.TestNet)
+
+        account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
+        print(account)
+        balance = account.get_balance()
+        print("Account balance", balance)
+        assert balance > 0
+
+        batch = []
+        for i in range(10):
+            batch.append(BatchTransfer(
+                "b50c2404e699fd985f71b2c3f032059f13d6543b",
+                Zil(i * 0.1))
+            )
+        pprint(batch)
+
+        txn_infos = account.transfer_batch(batch)
+        pprint(txn_infos)
+
+        txn_details = account.wait_txn_confirm(txn_infos[0]["TranID"], timeout=120)
+        pprint(txn_details)
+        assert txn_details
+
+        for txn_info in txn_infos:
+            txn_details = account.wait_txn_confirm(txn_info["TranID"])
+            pprint(txn_details)
+
+        balance2 = account.get_balance()
+        print("Account1 balance", balance2)
+
+    def test_transfer_qa(self):
+        chain.set_active_chain(chain.TestNet)
+
+        account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
+        print(account)
+        print("Account1 balance", repr(account.get_balance()))
+
+        account2 = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
+        print(account2)
+        balance = account2.get_balance()
+        print("Account2 balance", repr(balance))
+        assert balance > 0
+
+        to_addr = account.address
+        txn_info = account2.transfer(to_addr, Qa(123456789))
+        pprint(txn_info)
+
+        txn_details = account2.wait_txn_confirm(txn_info["TranID"], timeout=120)
+        pprint(txn_details)
+        assert txn_details
+
+        print("Account1 balance", repr(account.get_balance()))
+        print("Account1 balance", repr(account.get_balance_qa()))
