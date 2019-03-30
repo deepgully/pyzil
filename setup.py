@@ -7,10 +7,10 @@ setup file
 """
 
 from pyzil import version
-from setuptools import setup
+from setuptools import setup, find_packages
 
-packages = ["pyzil"]
-package_data = {"pyzil": ["tests/*"]}
+packages = find_packages()
+package_data = {"pyzil": ["tests/*", "tests/crypto/*"]}
 
 tests_require = ["pytest"]
 install_requires = [
