@@ -123,6 +123,10 @@ class TestAccount:
         print("Account1 balance", balance2)
         assert balance2 >= balance1 + 10.3
 
+        account = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
+        txn_info = account.transfer(account2.address, 10.3)
+        pprint(txn_info)
+
     def test_batch_transfer(self):
         chain.set_active_chain(chain.TestNet)
 
@@ -154,6 +158,10 @@ class TestAccount:
         balance2 = account.get_balance()
         print("Account1 balance", balance2)
 
+        account2 = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
+        txn_info = account2.transfer(account.address, sum([b.zils for b in batch]))
+        pprint(txn_info)
+
     def test_transfer_qa(self):
         chain.set_active_chain(chain.TestNet)
 
@@ -177,3 +185,7 @@ class TestAccount:
 
         print("Account1 balance", repr(account.get_balance()))
         print("Account1 balance", repr(account.get_balance_qa()))
+
+        account = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
+        txn_info = account.transfer(account2.checksum_address, Qa(123456789))
+        pprint(txn_info)
