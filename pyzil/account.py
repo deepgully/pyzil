@@ -12,7 +12,7 @@ Zilliqa Account
 :license: MIT License, see LICENSE for more details.
 """
 
-from typing import Union, Optional
+from typing import List, Union, Optional
 from collections import namedtuple
 
 from pyzil.crypto import zilkey
@@ -170,7 +170,7 @@ class Account:
         txn_info = active_chain.api.CreateTransaction(params)
         return txn_info
 
-    def transfer_batch(self, batch: BatchTransfer,
+    def transfer_batch(self, batch: List[BatchTransfer],
                        gas_price: Optional[int]=None, gas_limit=1):
         """Batch Transfer zils to addresses."""
         if not self.zil_key or not self.zil_key.encoded_private_key:
