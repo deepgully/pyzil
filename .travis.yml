@@ -1,7 +1,6 @@
 dist: xenial
 language: python
 python:
-  - "3.6"
   - "3.7"
 
 install:
@@ -14,6 +13,8 @@ deploy:
   provider: pypi
   user: $PYPI_USER
   password: $PYPI_PASSWORD
+  skip_existing: true
+  distributions: "sdist bdist_wheel"
   on:
     tags: true
     branch: master
