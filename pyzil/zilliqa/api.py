@@ -16,6 +16,9 @@ from jsonrpcclient.exceptions import JsonRpcClientError
 from jsonrpcclient.clients.http_client import HTTPClient
 
 
+INVALID_PARAMS = "INVALID_PARAMS: Invalid method parameters (invalid name and/or type) recognised"
+
+
 class APIError(Exception):
     pass
 
@@ -39,17 +42,25 @@ class ZilliqaAPI:
         return ZilliqaAPI.APIMethod(self, method_name=item)
 
     def call(self, method_name: str, *params, **kwargs):
-        # fixme: fix for jsonrpcclient < 3.3.1
-        # if len(params) == 1 and (isinstance(params[0], (dict, list))):
-        #     params = (list(params), )
+
+        def send_request(*_params):
+            try:
+                return self.api_client.request(
+                    method_name, *_params,
+                    trim_log_values=True, **kwargs
+                )
+            except JsonRpcClientError as _e:
+                raise APIError(_e)
 
         try:
-            return self.api_client.request(
-                method_name, *params,
-                trim_log_values=True, **kwargs
-            )
-        except JsonRpcClientError as e:
-            raise APIError(e)
+            return send_request(*params)
+        except APIError as e:
+            # fix for jsonrpcclient < 3.3.1
+            if str(e) == INVALID_PARAMS:
+                if len(params) == 1 and isinstance(params[0], (dict, list)):
+                    params = (list(params),)
+                    return send_request(*params)
+            raise e
 
 
 if "__main__" == __name__:
