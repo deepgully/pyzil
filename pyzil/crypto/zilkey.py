@@ -228,7 +228,7 @@ class ZilKey:
             raise ValueError("Invalid keystore file, address mismatch")
         return zilkey
 
-    def save_keysotre(self, password: str, kdf_method: str="pbkdf2",
+    def save_keystore(self, password: str, kdf_method: str="pbkdf2",
                       keystore_file=None) -> dict:
         """Save Zilliqa key to keystore, format details on
         https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition.
