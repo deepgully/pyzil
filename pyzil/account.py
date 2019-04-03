@@ -215,6 +215,7 @@ class Account:
 
         return txn_results
 
-    def wait_txn_confirm(self, txn_id, timeout=300, sleep=20):
+    @classmethod
+    def wait_txn_confirm(cls, txn_id, timeout=300, sleep=20):
         return active_chain.wait_txn_confirm(txn_id, timeout=timeout, sleep=sleep)
 
