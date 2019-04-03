@@ -118,9 +118,14 @@ min_gas = Qa(chain.active_chain.api.GetMinimumGasPrice())
 
 txn_info_list = []
 for key in nodes_keys:
+    if not key:
+       continue
     account = Account(private_key=key)
     # send all zils
     amount = account.get_balance() - min_gas
+    if amount <= 0:
+        continue
+    
     txn_info = account.transfer(to_addr=to_account.address, zils=amount, gas_price=min_gas)
     pprint(txn_info)
     
