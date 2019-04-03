@@ -136,13 +136,24 @@ class TestAccount:
         print("Account balance", balance)
         assert balance > 0
 
+        with pytest.raises(ValueError):
+            account.transfer_batch([
+                BatchTransfer("b50c2404e699fd985f71b2c3f032059f13d6543b", 0),
+                BatchTransfer("wrong_address", 0)
+            ])
+
         batch = []
+        total_zils = 0
         for i in range(10):
             batch.append(BatchTransfer(
                 "b50c2404e699fd985f71b2c3f032059f13d6543b",
                 Zil(i * 0.1))
             )
+            total_zils += (i * 0.1)
+
         pprint(batch)
+        batch.append(BatchTransfer("b50c2404e699fd985f71b2c3f032059f13d6543b", 500000))
+        batch.append(BatchTransfer("b50c2404e699fd985f71b2c3f032059f13d6543b", 0))
 
         txn_infos = account.transfer_batch(batch)
         pprint(txn_infos)
@@ -152,14 +163,21 @@ class TestAccount:
         assert txn_details
 
         for txn_info in txn_infos:
-            txn_details = account.wait_txn_confirm(txn_info["TranID"])
-            pprint(txn_details)
+            if not txn_info:
+                print("Failed to create txn")
+            else:
+                txn_details = account.wait_txn_confirm(txn_info["TranID"])
+                pprint(txn_details)
+                if txn_details and txn_details["receipt"]["success"]:
+                    print("Txn success")
+                else:
+                    print("Txn failed")
 
         balance2 = account.get_balance()
         print("Account1 balance", balance2)
 
         account2 = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
-        txn_info = account2.transfer(account.address, sum([b.zils for b in batch]))
+        txn_info = account2.transfer(account.address, total_zils)
         pprint(txn_info)
 
     def test_transfer_qa(self):

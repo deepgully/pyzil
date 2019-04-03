@@ -99,7 +99,8 @@ class BlockChain:
         while time.time() - start <= timeout:
             try:
                 return self.api.GetTransaction(txn_id)
-            except APIError:
+            except APIError as e:
+                print("Retry GetTransaction: {}".format(e))
                 time.sleep(sleep)
         return None
 

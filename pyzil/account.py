@@ -203,11 +203,18 @@ class Account:
             txn_params.append(params)
             batch_nonce += 1
 
-        return [
-            active_chain.api.CreateTransaction(params)
-            for params in txn_params
-        ]
+        txn_results = []
+        for params in txn_params:
+            try:
+                txn_info = active_chain.api.CreateTransaction(params)
+            except Exception as e:
+                print("Error to CreateTransaction: {}".format(e))
+                txn_info = None
 
-    def wait_txn_confirm(self, txn_id, timeout=60, sleep=5):
+            txn_results.append(txn_info)
+
+        return txn_results
+
+    def wait_txn_confirm(self, txn_id, timeout=300, sleep=20):
         return active_chain.wait_txn_confirm(txn_id, timeout=timeout, sleep=sleep)
 
