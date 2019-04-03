@@ -102,6 +102,42 @@ balance2 = account.get_balance()
 print("Account balance: {}".format(balance2))
 ```
 
+#### Send ZILs from nodes to wallet
+```python
+nodes_keys = [
+    "private_key1",
+    "private_key2",
+    "private_key3",
+]
+
+to_address = "your wallet address"
+to_account = Account(address=to_address)
+print("Account balance: {}".format(to_account.get_balance()))
+
+min_gas = Qa(chain.active_chain.api.GetMinimumGasPrice())
+
+txn_info_list = []
+for key in nodes_keys:
+    account = Account(private_key=key)
+    # send all zils
+    amount = account.get_balance() - min_gas
+    txn_info = account.transfer(to_addr=to_account.address, zils=amount)
+    pprint(txn_info)
+    
+    txn_info_list.append(txn_info)
+
+for txn_info in txn_info_list:   
+    txn_details = chain.active_chain.wait_txn_confirm(txn_info["TranID"], timeout=300)
+    pprint(txn_details)
+    if txn_details and txn_details["receipt"]["success"]:
+        print("Txn success")
+    else:
+        print("Txn failed")
+
+print("Account balance: {}".format(to_account.get_balance()))
+
+```
+
 #### load account from mykey.txt
 ```python
 account = Account.from_mykey_txt("mykey.txt")
