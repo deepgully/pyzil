@@ -26,6 +26,9 @@ BatchTransfer = namedtuple("BatchTransfer", ["to_addr", "zils"])
 
 class Account:
     """Zilliqa Account"""
+
+    _min_gas = None
+
     def __init__(self, address=None, public_key=None, private_key=None):
         if address is None and public_key is None and private_key is None:
             raise ValueError("missing argument")
@@ -44,8 +47,6 @@ class Account:
                 if self.zil_key.address != self.address:
                     raise ValueError("mismatch address and zilkey")
             self.address = self.zil_key.address
-
-        self._min_gas = None
 
     def __str__(self):
         return "<Account: {}>".format(self.address)
@@ -102,10 +103,11 @@ class Account:
         zil_key = zilkey.ZilKey.load_keystore(password, keystore_file)
         return cls.from_zilkey(zil_key)
 
-    def get_min_gas_price(self, refresh=False) -> int:
-        if refresh or self._min_gas is None:
-            self._min_gas = int(active_chain.api.GetMinimumGasPrice())
-        return self._min_gas
+    @classmethod
+    def get_min_gas_price(cls, refresh=False) -> int:
+        if refresh or cls._min_gas is None:
+            cls._min_gas = int(active_chain.api.GetMinimumGasPrice())
+        return cls._min_gas
 
     def get_balance_nonce(self) -> dict:
         """Return raw response of GetBalance."""
