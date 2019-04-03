@@ -121,7 +121,7 @@ for key in nodes_keys:
     account = Account(private_key=key)
     # send all zils
     amount = account.get_balance() - min_gas
-    txn_info = account.transfer(to_addr=to_account.address, zils=amount)
+    txn_info = account.transfer(to_addr=to_account.address, zils=amount, gas_price=min_gas)
     pprint(txn_info)
     
     txn_info_list.append(txn_info)
