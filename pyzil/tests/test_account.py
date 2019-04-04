@@ -92,7 +92,7 @@ class TestAccount:
         print("balance", balance)
         assert balance > 0
 
-    def test_transfer(self):
+    def _test_transfer(self):
         chain.set_active_chain(chain.TestNet)
 
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
@@ -127,7 +127,7 @@ class TestAccount:
         txn_info = account.transfer(account2.address, 10.3)
         pprint(txn_info)
 
-    def test_batch_transfer(self):
+    def _test_batch_transfer(self):
         chain.set_active_chain(chain.TestNet)
 
         account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
@@ -180,7 +180,7 @@ class TestAccount:
         txn_info = account2.transfer(account.address, total_zils)
         pprint(txn_info)
 
-    def test_transfer_qa(self):
+    def _test_transfer_qa(self):
         chain.set_active_chain(chain.TestNet)
 
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")

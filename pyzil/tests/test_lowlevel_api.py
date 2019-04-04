@@ -98,17 +98,17 @@ class TestAPI:
 
         latest_txns = api.GetRecentTransactions()
         pprint(latest_txns)
-        assert latest_txns
 
-        txn_hash = latest_txns["TxnHashes"][0]
-        txn_info = api.GetTransaction(txn_hash)
-        pprint(txn_info)
-        assert txn_info
+        if latest_txns:
+            txn_hash = latest_txns["TxnHashes"][0]
+            txn_info = api.GetTransaction(txn_hash)
+            pprint(txn_info)
+            assert txn_info
 
-        tx_block = txn_info["receipt"]["epoch_num"]
-        txns = api.GetTransactionsForTxBlock(tx_block)
-        pprint(txns)
-        assert txns
+            tx_block = txn_info["receipt"]["epoch_num"]
+            txns = api.GetTransactionsForTxBlock(tx_block)
+            pprint(txns)
+            assert txns
 
         num_txns = api.GetNumTxnsTxEpoch()
         pprint(num_txns)
