@@ -77,7 +77,7 @@ class BlockChain:
 
         data_to_sign = txn_proto.SerializeToString()
         signature = zil_key.sign_str(data_to_sign)
-        assert zil_key.verify(signature, data_to_sign)
+        # assert zil_key.verify(signature, data_to_sign)
 
         params = {
             "version": txn_proto.version,
