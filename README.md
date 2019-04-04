@@ -149,12 +149,6 @@ account = Account.from_mykey_txt("mykey.txt")
 print(account)
 ```  
 
-#### load account from mykey.txt
-```python
-account = Account.from_mykey_txt("mykey.txt")
-print(account)
-```  
-
 #### load account from keystore.json
 ```python
 account = Account.from_keystore("keystore.json")
