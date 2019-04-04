@@ -116,7 +116,7 @@ class TestZilKey:
         checksum_address = crypto.zilkey.to_checksum_address("526a2719b5855ef7d396a62b912a0dfa08e6ae63")
         assert checksum_address == key.checksum_address
 
-        keystore = key.save_keysotre("1234", keystore_file=path_join("zilliqa_keystore3.json"))
+        keystore = key.save_keystore("1234", keystore_file=path_join("zilliqa_keystore3.json"))
         assert keystore["address"] == key.address
         key_file2 = path_join("zilliqa_keystore3.json")
         key2 = crypto.ZilKey.load_keystore("1234", key_file2)
