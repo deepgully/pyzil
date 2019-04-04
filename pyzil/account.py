@@ -14,6 +14,8 @@ Zilliqa Account
 
 from typing import List, Union, Optional
 from collections import namedtuple
+from concurrent import futures
+from concurrent.futures import ThreadPoolExecutor
 
 from pyzil.crypto import zilkey
 from pyzil.zilliqa.api import APIError
@@ -173,7 +175,8 @@ class Account:
         return txn_info
 
     def transfer_batch(self, batch: List[BatchTransfer],
-                       gas_price: Optional[int]=None, gas_limit=1):
+                       gas_price: Optional[int]=None, gas_limit=1,
+                       max_workers=200, timeout=None):
         """Batch Transfer zils to addresses."""
         if not self.zil_key or not self.zil_key.encoded_private_key:
             raise RuntimeError("can not create transaction without private key")
@@ -205,15 +208,24 @@ class Account:
             txn_params.append(params)
             batch_nonce += 1
 
-        txn_results = []
-        for params in txn_params:
+        def create_txn(p):
             try:
-                txn_info = active_chain.api.CreateTransaction(params)
+                txn_info = active_chain.api.CreateTransaction(p)
             except Exception as e:
-                print("Error to CreateTransaction: {}".format(e))
+                print("Error in CreateTransaction: {}".format(e))
                 txn_info = None
+            return txn_info
 
-            txn_results.append(txn_info)
+        txn_results = []
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            all_tasks = [pool.submit(create_txn, p) for p in txn_params]
+
+            for future in futures.as_completed(all_tasks, timeout=timeout):
+                try:
+                    txn_results.append(future.result())
+                except Exception as e:
+                    print("Error: {}".format(e))
+                    txn_results.append(None)
 
         return txn_results
 
