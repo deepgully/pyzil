@@ -50,6 +50,10 @@ class Account:
                     raise ValueError("mismatch address and zilkey")
             self.address = self.zil_key.address
 
+        self.last_params = None
+        self.last_txn_info = None
+        self.last_txn_details = None
+
     def __str__(self):
         return "<Account: {}>".format(self.address)
 
@@ -61,6 +65,10 @@ class Account:
             return False
 
         return self.zil_key == other.zil_key
+
+    @property
+    def address0x(self) -> str:
+        return "0x" + self.address
 
     @property
     def checksum_address(self) -> str:
@@ -139,7 +147,8 @@ class Account:
                  zils: Union[str, float, Zil, Qa],
                  nonce: Optional[int]=None,
                  gas_price: Optional[int]=None, gas_limit=1,
-                 code="", data="", priority=False):
+                 code="", data="", priority=False,
+                 confirm=False, timeout=300, sleep=20):
         """Transfer zils to another address."""
         if not self.zil_key or not self.zil_key.encoded_private_key:
             raise RuntimeError("can not create transaction without private key")
@@ -170,9 +179,22 @@ class Account:
             gas_price, gas_limit,
             code, data, priority
         )
+        self.last_params = params
 
         txn_info = active_chain.api.CreateTransaction(params)
-        return txn_info
+        self.last_txn_info = txn_info
+        if not confirm:
+            return txn_info
+
+        if not txn_info:
+            return None
+
+        txn_details = Account.wait_txn_confirm(
+            txn_info["TranID"],
+            timeout=timeout, sleep=sleep
+        )
+        self.last_txn_details = txn_details
+        return txn_details
 
     def transfer_batch(self, batch: List[BatchTransfer],
                        gas_price: Optional[int]=None, gas_limit=1,
@@ -232,4 +254,3 @@ class Account:
     @classmethod
     def wait_txn_confirm(cls, txn_id, timeout=300, sleep=20):
         return active_chain.wait_txn_confirm(txn_id, timeout=timeout, sleep=sleep)
-

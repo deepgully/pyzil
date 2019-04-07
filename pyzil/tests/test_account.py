@@ -207,3 +207,37 @@ class TestAccount:
         account = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
         txn_info = account.transfer(account2.checksum_address, Qa(123456789))
         pprint(txn_info)
+
+    def test_transfer_confirm(self):
+        chain.set_active_chain(chain.TestNet)
+
+        account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
+        print(account)
+        balance1 = account.get_balance()
+        print("Account1 balance", balance1)
+        with pytest.raises(RuntimeError):
+            account.transfer("to_addr", 1)
+
+        account2 = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
+        print(account2)
+        balance = account2.get_balance()
+        print("Account2 balance", balance)
+        assert balance > 0
+
+        to_addr = account.address
+        result = account2.transfer(to_addr, Zil(10.3), confirm=True, timeout=300, sleep=20)
+        print("Transfer Result", result)
+        pprint(account2.last_params)
+        pprint(account2.last_txn_info)
+        pprint(account2.last_txn_details)
+
+        balance2 = account.get_balance()
+        print("Account1 balance", balance2)
+        assert balance2 >= balance1 + 10.3
+
+        account = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
+        result = account.transfer(account2.address, 10.3, confirm=True, timeout=600, sleep=20)
+        print("Transfer Result", result)
+        pprint(account2.last_params)
+        pprint(account2.last_txn_info)
+        pprint(account2.last_txn_details)

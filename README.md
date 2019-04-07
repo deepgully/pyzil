@@ -78,6 +78,19 @@ pprint(txn_info)
 txn_id = txn_info["TranID"]
 ```  
 
+#### Wait for confirm
+```python
+amount = Zil(3.14)
+txn_details = account.transfer(to_addr, zils=amount, 
+                               confirm=True, timeout=300, sleep=20)
+print("Transfer Result:")
+pprint(txn_details)
+pprint(account.last_params)
+pprint(account.last_txn_info)
+pprint(account.last_txn_details)
+
+```  
+
 #### Batch Transfer (Send zils to multi addresses)
 ```python
 batch = [BatchTransfer(to_addr=to_addr, zils=i) for i in range(10)]
