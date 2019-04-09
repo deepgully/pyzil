@@ -109,7 +109,7 @@ class TestAccount:
         assert contract.last_receipt["success"]
         assert contract.last_receipt["event_logs"][0]["params"][0]["vname"] == "code"
         assert contract.last_receipt["event_logs"][0]["params"][0]["type"] == "Int32"
-        assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == 2
+        assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == "2"
 
         resp = contract.call(method="getHello", params=[])
         print(resp)
