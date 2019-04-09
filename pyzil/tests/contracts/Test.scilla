@@ -1,0 +1,12 @@
+scilla_version 0
+
+contract Test
+(owner: ByStr20)
+
+field message : String = "Test Message"
+
+transition getMessage ()
+    r <- message;
+    e = {_eventname: "getMessage()"; msg: r};
+    event e
+end

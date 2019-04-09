@@ -222,5 +222,72 @@ print(repr(qa // 2))
 
 ## Zilliqa Smart Contract
 ```python
+from pprint import pprint
+from pyzil.zilliqa import chain
+from pyzil.account import Account
+from pyzil.contract import Contract
 
+
+chain.set_active_chain(chain.TestNet)
+
+account = Account.from_keystore("zxcvbnm,", "zilliqa_keystore.json")
+```
+
+### Get contract from address
+```python
+address = "45dca9586598c8af78b191eaa28daf2b0a0b4f43"
+contract = Contract.load_from_address(address, load_state=True)
+print(contract)
+print(contract.status)
+pprint(contract.state)
+contract.get_state(get_code=True, get_init=True)
+pprint(contract.code)
+pprint(contract.init)
+pprint(contract.state)
+```
+
+### New contract from code
+```python
+code = open("HelloWorld.scilla").read()
+contract = Contract.new_from_code(code)
+print(contract)
+
+# set account before deploy
+contract.account = account
+
+contract.deploy(timeout=300, sleep=10)
+assert contract.status == Contract.Status.Deployed
+```
+
+### Get contracts
+```python
+owner_addr = account.address
+contracts = Contract.get_contracts(owner_addr)
+pprint(contracts)
+contracts2 = account.get_contracts()
+pprint(contracts2)
+
+assert contracts == contracts2
+```
+
+### Call contract
+```python
+contract_addr = "45dca9586598c8af78b191eaa28daf2b0a0b4f43"
+contract = Contract.load_from_address(contract_addr)
+
+contract.account = account
+
+resp = contract.call(method="getHello", params=[])
+pprint(resp)
+pprint(contract.last_receipt)
+
+resp = contract.call(method="setHello", params=[Contract.value_dict("msg", "String", "hi contract.")])
+pprint(resp)
+pprint(contract.last_receipt)
+
+resp = contract.call(method="getHello", params=[])
+pprint(resp)
+pprint(contract.last_receipt)
+
+# see more examples in test_contract.py
 ```

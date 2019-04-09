@@ -143,6 +143,11 @@ class Account:
         resp = self.get_balance_nonce()
         return int(resp["nonce"])
 
+    def get_contracts(self) -> List["Contract"]:
+        from pyzil.contract import Contract
+
+        return Contract.get_contracts(self.address)
+
     def transfer(self, to_addr: str,
                  zils: Union[str, float, Zil, Qa],
                  nonce: Optional[int]=None,
