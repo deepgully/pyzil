@@ -135,7 +135,7 @@ for key in nodes_keys:
        continue
     account = Account(private_key=key)
     # send all zils
-    amount = account.get_balance() - min_gas
+    amount = account.get_balance_qa() - min_gas * 2
     if amount <= 0:
         continue
     
