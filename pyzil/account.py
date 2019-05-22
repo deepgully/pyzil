@@ -37,9 +37,9 @@ class Account:
 
         self.address = None
         if address is not None:
-            if not zilkey.is_valid_address(address):
-                raise ValueError("invalid address")
-            self.address = zilkey.to_valid_address(address)
+            address = zilkey.to_valid_address(address)
+            assert address, "invalid address"
+            self.address = address
 
         self.zil_key = None
         if public_key or private_key:
@@ -74,6 +74,11 @@ class Account:
     def checksum_address(self) -> str:
         """Return str of checksum address."""
         return zilkey.to_checksum_address(self.address)
+
+    @property
+    def bech32_address(self) -> str:
+        """Return str of bech32 address."""
+        return zilkey.to_bech32_address(self.address)
 
     @property
     def public_key(self) -> Optional[str]:

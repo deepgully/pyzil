@@ -52,6 +52,14 @@ class TestAccount:
         assert account.checksum_address == zilkey.to_checksum_address(address)
         assert account.zil_key is not None
 
+        addr = "1d19918a737306218b5cbb3241fcdcbd998c3a72"
+        bech32_addr = "zil1r5verznnwvrzrz6uhveyrlxuhkvccwnju4aehf"
+        account1 = Account(address=addr)
+        account2 = Account(address=bech32_addr)
+        assert account1 == account2
+        assert account1.bech32_address == bech32_addr
+        assert account2.address == addr
+
     def test_load_mykey_txt(self):
         account = Account.from_mykey_txt(path_join("crypto", "mykey.txt"))
         assert account and account.address == "967e40168af66f441b73c0146e26069bfc3accc7"

@@ -65,6 +65,11 @@ class Contract:
         return self.address and "0x{}".format(self.address)
 
     @property
+    def bech32_address(self) -> str:
+        """Return str of bech32 address."""
+        return zilkey.to_bech32_address(self.address)
+
+    @property
     def account(self):
         if not self._account:
             raise ValueError("you must set account to deploy/call contract")

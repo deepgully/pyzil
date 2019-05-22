@@ -13,6 +13,7 @@ Zilliqa Blockchain.
 """
 
 import time
+import logging
 from typing import Union, Optional
 
 from pyzil.common import utils
@@ -100,7 +101,7 @@ class BlockChain:
             try:
                 return self.api.GetTransaction(txn_id)
             except APIError as e:
-                print("Retry GetTransaction: {}".format(e))
+                logging.debug("Retry GetTransaction: {}".format(e))
                 time.sleep(sleep)
         return None
 

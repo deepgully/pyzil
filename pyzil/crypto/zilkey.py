@@ -18,7 +18,7 @@ from typing import Union, Optional
 from collections import namedtuple
 
 from pyzil.common import utils
-from pyzil.crypto import tools, schnorr
+from pyzil.crypto import tools, schnorr, bech32
 
 
 # zilliqa address takes the last 20 bytes from hash digest of public key
@@ -42,6 +42,9 @@ def is_valid_address(address: str) -> bool:
 
 def to_valid_address(address: str) -> Optional[str]:
     """Return lower case address if address is valid."""
+    if is_bech32_address(address):
+        address = from_bech32_address(address)
+
     if not is_valid_address(address):
         return None
     address = address.lower()
@@ -52,6 +55,9 @@ def to_valid_address(address: str) -> Optional[str]:
 
 def to_checksum_address(address: str, prefix="0x") -> Optional[str]:
     """Convert address to checksum address."""
+    if is_bech32_address(address):
+        address = from_bech32_address(address)
+
     if not is_valid_address(address):
         return None
 
@@ -76,6 +82,29 @@ def is_valid_checksum_address(address: str) -> bool:
     if not is_valid_address(address):
         return False
     return to_checksum_address(address) == address
+
+
+def to_bech32_address(address: str) -> Optional[str]:
+    """Convert 20 bytes address to bech32 address."""
+    if not is_valid_address(address):
+        return None
+    return bech32.encode("zil", utils.hex_str_to_bytes(address))
+
+
+def from_bech32_address(bech32_address: str) -> Optional[str]:
+    """Convert bech32 address to 20 bytes address."""
+    data = bech32.decode("zil", bech32_address)
+    if data is None:
+        return None
+    address = utils.bytes_to_hex_str(bytes(data))
+    return to_valid_address(address)
+
+
+def is_bech32_address(bech32_address: str) -> bool:
+    """Return True if address is valid bech32 address."""
+    if not bech32_address.startswith("zil1"):
+        return False
+    return from_bech32_address(bech32_address) is not None
 
 
 KeyPair = namedtuple("KeyPair", ["public", "private"])

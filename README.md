@@ -170,6 +170,22 @@ print(account)
 # see more examples in tests/test_account.py
 ```  
 
+#### bech32 address
+```python
+# init from bech32 address
+account1 = Account(address="zil1r5verznnwvrzrz6uhveyrlxuhkvccwnju4aehf")
+print("address: {}".format(account1.address))
+account2 = Account(address="1d19918a737306218b5cbb3241fcdcbd998c3a72")
+print("bech32 address: {}".format(account2.bech32_address))
+assert account1 == account2
+
+# tranfer to bech32 address
+account = Account.from_mykey_txt("mykey.txt")
+txn_info = account.transfer(to_addr="zil1r5verznnwvrzrz6uhveyrlxuhkvccwnju4aehf", zils=0.01)
+pprint(txn_info)
+txn_id = txn_info["TranID"]
+
+```  
 
 
 ## Zilliqa Low-level APIs

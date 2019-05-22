@@ -5,6 +5,7 @@
 
 import os
 import re
+import json
 import pytest
 
 from pyzil.common import utils
@@ -126,3 +127,17 @@ class TestZilKey:
             crypto.ZilKey.load_keystore("12345", key_file2)
 
         os.remove(path_join("zilliqa_keystore3.json"))
+
+    def test_bech32_address(self):
+        for addr in json.load(open(path_join("bech32.fixtures.json"))):
+            print(addr)
+            bech32_addr = crypto.zilkey.to_bech32_address(addr["b16"])
+            print(bech32_addr)
+            assert bech32_addr == addr["b32"]
+
+            bytes_addr = crypto.zilkey.from_bech32_address(addr["b32"])
+            print(bytes_addr)
+            assert bytes_addr == crypto.zilkey.to_valid_address(addr["b16"])
+
+            assert crypto.zilkey.is_bech32_address(addr["b32"])
+            assert not crypto.zilkey.is_bech32_address(addr["b16"])
