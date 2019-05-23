@@ -189,7 +189,10 @@ class ZilKey:
 
         message = utils.ensure_bytes(message)
 
-        return schnorr.sign(message, self.keypair_bytes.private)
+        signature = schnorr.sign(message, self.keypair_bytes.private)
+        if signature is None:
+            raise RuntimeError("failed to sign")
+        return signature
 
     def sign_str(self, message: str) -> str:
         """Sign bytes message with private key, return hex string"""
