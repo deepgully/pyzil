@@ -4,6 +4,7 @@
 # MIT License
 
 import pytest
+import logging
 from pprint import pprint
 
 from pyzil.crypto import zilkey
@@ -16,6 +17,10 @@ def path_join(*path):
     import os
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(cur_dir, *path)
+
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 class TestAccount:
@@ -100,7 +105,7 @@ class TestAccount:
         print("balance", balance)
         assert balance > 0
 
-    def _test_transfer(self):
+    def test_transfer(self):
         chain.set_active_chain(chain.TestNet)
 
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
@@ -116,11 +121,19 @@ class TestAccount:
         print("Account2 balance", balance)
         assert balance > 0
 
-        to_addr = account.address
+        # check address format
         with pytest.raises(ValueError):
-            account2.transfer(to_addr, 50000)
+            account2.transfer(account.address, Zil(10.3))
 
-        txn_info = account2.transfer(to_addr, Zil(10.3))
+        with pytest.raises(ValueError):
+            account2.transfer(account.address0x, Zil(10.3))
+
+        # checksum address
+        # check insufficient balance
+        with pytest.raises(ValueError):
+            account2.transfer(account.checksum_address, 50000)
+
+        txn_info = account2.transfer(account.checksum_address, Zil(10.3))
         pprint(txn_info)
 
         txn_details = account2.wait_txn_confirm(txn_info["TranID"], timeout=120)
@@ -132,10 +145,11 @@ class TestAccount:
         assert balance2 >= balance1 + 10.3
 
         account = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
-        txn_info = account.transfer(account2.address, 10.3)
+        # bech32 address
+        txn_info = account.transfer(account2.bech32_address, 10.3, confirm=True)
         pprint(txn_info)
 
-    def _test_batch_transfer(self):
+    def test_batch_transfer(self):
         chain.set_active_chain(chain.TestNet)
 
         account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
@@ -144,24 +158,35 @@ class TestAccount:
         print("Account balance", balance)
         assert balance > 0
 
+        to_account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
+
+        # check address format
         with pytest.raises(ValueError):
             account.transfer_batch([
-                BatchTransfer("b50c2404e699fd985f71b2c3f032059f13d6543b", 0),
-                BatchTransfer("wrong_address", 0)
+                BatchTransfer(to_account.checksum_address, 0.001),
+                BatchTransfer("wrong_address", 0.001)
+            ])
+
+        with pytest.raises(ValueError):
+            account.transfer_batch([
+                BatchTransfer(to_account.address, 0.001),
+            ])
+
+        with pytest.raises(ValueError):
+            account.transfer_batch([
+                BatchTransfer(to_account.address0x, 0.001),
             ])
 
         batch = []
         total_zils = 0
         for i in range(10):
-            batch.append(BatchTransfer(
-                "b50c2404e699fd985f71b2c3f032059f13d6543b",
-                Zil(i * 0.1))
-            )
+            batch.append(BatchTransfer(to_account.checksum_address, Zil(i * 0.1)))
+            total_zils += (i * 0.1)
+
+            batch.append(BatchTransfer(to_account.bech32_address, Zil(i * 0.1)))
             total_zils += (i * 0.1)
 
         pprint(batch)
-        batch.append(BatchTransfer("b50c2404e699fd985f71b2c3f032059f13d6543b", 500000))
-        batch.append(BatchTransfer("b50c2404e699fd985f71b2c3f032059f13d6543b", 0))
 
         txn_infos = account.transfer_batch(batch)
         pprint(txn_infos)
@@ -185,10 +210,10 @@ class TestAccount:
         print("Account1 balance", balance2)
 
         account2 = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
-        txn_info = account2.transfer(account.address, total_zils)
+        txn_info = account2.transfer(account.bech32_address, total_zils, confirm=True)
         pprint(txn_info)
 
-    def _test_transfer_qa(self):
+    def test_transfer_qa(self):
         chain.set_active_chain(chain.TestNet)
 
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
@@ -201,8 +226,7 @@ class TestAccount:
         print("Account2 balance", repr(balance))
         assert balance > 0
 
-        to_addr = account.address
-        txn_info = account2.transfer(to_addr, Qa(123456789))
+        txn_info = account2.transfer(account.bech32_address, Qa(123456789))
         pprint(txn_info)
 
         txn_details = account2.wait_txn_confirm(txn_info["TranID"], timeout=120)
@@ -213,7 +237,7 @@ class TestAccount:
         print("Account1 balance", repr(account.get_balance_qa()))
 
         account = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
-        txn_info = account.transfer(account2.checksum_address, Qa(123456789))
+        txn_info = account.transfer(account2.checksum_address, Qa(123456789), confirm=True)
         pprint(txn_info)
 
     def test_transfer_confirm(self):
@@ -232,8 +256,7 @@ class TestAccount:
         print("Account2 balance", balance)
         assert balance > 0
 
-        to_addr = account.address
-        result = account2.transfer(to_addr, Zil(10.3), confirm=True, timeout=300, sleep=20)
+        result = account2.transfer(account.checksum_address, Zil(10.3), confirm=True, timeout=300, sleep=20)
         print("Transfer Result", result)
         pprint(account2.last_params)
         pprint(account2.last_txn_info)
@@ -244,7 +267,7 @@ class TestAccount:
         assert balance2 >= balance1 + 10.3
 
         account = Account(private_key="d0b47febbef2bd0c4a4ee04aa20b60d61eb02635e8df5e7fd62409a2b1f5ddf8")
-        result = account.transfer(account2.address, 10.3, confirm=True, timeout=600, sleep=20)
+        result = account.transfer(account2.bech32_address, 10.3, confirm=True, timeout=600, sleep=20)
         print("Transfer Result", result)
         pprint(account2.last_params)
         pprint(account2.last_txn_info)

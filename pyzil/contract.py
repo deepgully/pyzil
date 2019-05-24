@@ -39,7 +39,7 @@ class Contract:
                  status: Status=Status.Unknown):
         if address is not None:
             address = zilkey.to_valid_address(address)
-            assert address, "invalid address"
+            assert address, "invalid address format"
         self.address = address
         self.code = code
         self.init = init
@@ -63,6 +63,11 @@ class Contract:
     @property
     def address0x(self) -> str:
         return self.address and "0x{}".format(self.address)
+
+    @property
+    def checksum_address(self) -> str:
+        """Return str of checksum address."""
+        return zilkey.to_checksum_address(self.address)
 
     @property
     def bech32_address(self) -> str:
@@ -188,7 +193,7 @@ class Contract:
         })
 
         txn_info = self.account.transfer(
-            to_addr=self.address,
+            to_addr=self.checksum_address,
             zils=0,
             nonce=nonce,
             gas_price=gas_price,

@@ -107,6 +107,19 @@ def is_bech32_address(bech32_address: str) -> bool:
     return from_bech32_address(bech32_address) is not None
 
 
+def normalise_address(address: str) -> str:
+    """Check address format, return checksum address."""
+    if is_bech32_address(address):
+        address = from_bech32_address(address)
+        if not address:
+            raise ValueError("Invalid address format")
+        return to_checksum_address(address)
+
+    if not is_valid_checksum_address(address):
+        raise ValueError("Invalid address format")
+    return address
+
+
 KeyPair = namedtuple("KeyPair", ["public", "private"])
 
 
@@ -174,6 +187,10 @@ class ZilKey:
     @property
     def checksum_address(self) -> str:
         return to_checksum_address(self.address)
+
+    @property
+    def bech32_address(self) -> str:
+        return to_bech32_address(self.address)
 
     def __str__(self):
         return str(self.keypair_str)

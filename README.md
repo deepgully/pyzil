@@ -55,7 +55,8 @@ account = Account(private_key="05C3CF3387F31202CD0798B7AA882327A1BD365331F90954A
 balance2 = account.get_balance()
 print("Account balance: {}".format(balance2))
 
-to_addr = "b50c2404e699fd985f71b2c3f032059f13d6543b"
+# to_addr must be bech32 address or 20 bytes checksum address
+to_addr = "zil1k5xzgp8xn87eshm3ktplqvs9nufav4pmcm52xx"
 # send ZILs
 txn_info = account.transfer(to_addr=to_addr, zils=2.718)
 pprint(txn_info)
@@ -139,7 +140,7 @@ for key in nodes_keys:
     if amount <= 0:
         continue
     
-    txn_info = account.transfer(to_addr=to_account.address, zils=amount, gas_price=min_gas)
+    txn_info = account.transfer(to_addr=to_account.bech32_address, zils=amount, gas_price=min_gas)
     pprint(txn_info)
     
     txn_info_list.append(txn_info)

@@ -163,7 +163,7 @@ class Account:
         if not self.zil_key or not self.zil_key.encoded_private_key:
             raise RuntimeError("can not create transaction without private key")
 
-        to_addr = zilkey.to_checksum_address(to_addr)
+        to_addr = zilkey.normalise_address(to_addr)
         if not to_addr:
             raise ValueError("invalid to address")
 
@@ -213,6 +213,12 @@ class Account:
         if not self.zil_key or not self.zil_key.encoded_private_key:
             raise RuntimeError("can not create transaction without private key")
 
+        # check address format
+        for to_addr, zils in batch:
+            to_addr = zilkey.normalise_address(to_addr)
+            if not to_addr:
+                raise ValueError("invalid to address")
+
         if gas_price is None:
             gas_price = self.get_min_gas_price(refresh=False)
 
@@ -221,7 +227,7 @@ class Account:
 
         txn_params = []
         for to_addr, zils in batch:
-            to_addr = zilkey.to_checksum_address(to_addr)
+            to_addr = zilkey.normalise_address(to_addr)
             if not to_addr:
                 raise ValueError("invalid to address")
 
