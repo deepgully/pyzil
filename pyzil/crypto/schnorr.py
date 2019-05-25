@@ -20,6 +20,8 @@ from fastecdsa import keys
 from fastecdsa import point
 from fastecdsa import curve
 
+from pyzil.crypto.drbg import randbelow_drbg
+
 
 CURVE = curve.secp256k1
 CURVE_BITS = 256
@@ -110,7 +112,8 @@ def mod_sqrt(n: int, p: int, is_odd: bool) -> int:
 def sign(bytes_msg: bytes, bytes_private: bytes, retries=10) -> Optional[bytes]:
     """sign bytes message with private key."""
     for i in range(retries):
-        k = secrets.randbelow(CURVE.q)
+        # k = secrets.randbelow(CURVE.q)
+        k = randbelow_drbg(CURVE.q, nonce=bytes_private + bytes_msg)
         if k == 0:
             continue
         signature = sign_with_k(bytes_msg, bytes_private, k)
