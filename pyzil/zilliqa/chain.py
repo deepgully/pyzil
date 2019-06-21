@@ -112,7 +112,8 @@ TestNet = BlockChain("https://dev-api.zilliqa.com/",
 
 MainNet = BlockChain("https://api.zilliqa.com/",
                      version=65537, network_id=1)
-
+LocalNet = BlockChain("http://localhost:4201",
+                     version= 131073, network_id= 2)
 
 if "__main__" == __name__:
     print(TestNet.api.GetCurrentMiniEpoch())
