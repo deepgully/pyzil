@@ -84,7 +84,7 @@ class BlockChain:
             "version": txn_proto.version,
             "nonce": txn_proto.nonce,
             "toAddr": to_addr,
-            "amount": str(amount),
+            "amount": str(int(amount)),
             "pubKey": zil_key.keypair_str.public,
             "gasPrice": str(gas_price),
             "gasLimit": str(gas_limit),
