@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Zilliqa Python Library
-# Copyright (C) 2019  Gully Chen
+# Copyright (C) 2020  Gully Chen
 # MIT License
 
 """
@@ -26,4 +26,4 @@ usage:
 :license: MIT License, see LICENSE for more details.
 """
 
-version = "1.1.10"
+version = "1.4.12"

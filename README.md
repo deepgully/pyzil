@@ -306,5 +306,10 @@ resp = contract.call(method="getHello", params=[])
 pprint(resp)
 pprint(contract.last_receipt)
 
+# call contract and deposit Zils to contract (default is 0)
+resp = contract.call(method="getHello", params=[], amount=Qa(110))
+pprint(resp)
+pprint(contract.last_receipt)
+
 # see more examples in test_contract.py
 ```

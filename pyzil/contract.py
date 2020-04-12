@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Zilliqa Python Library
-# Copyright (C) 2019  Gully Chen
+# Copyright (C) 2020  Gully Chen
 # MIT License
 """
 pyzil.contract
@@ -180,8 +180,8 @@ class Contract:
     def call(self, method: str,
              params: Optional[List[Dict]],
              nonce: Optional[int] = None,
-             gas_price: Optional[int] = None, gas_limit=10000, priority=False,
-             confirm=True, timeout=300, sleep=10) -> Optional[Dict]:
+             gas_price: Optional[int] = None, gas_limit=10000, priority=True,
+             confirm=True, timeout=300, sleep=10, amount=0) -> Optional[Dict]:
         if not self.address:
             raise ValueError("invalid contract address")
         if self.status != Contract.Status.Deployed:
@@ -194,7 +194,7 @@ class Contract:
 
         txn_info = self.account.transfer(
             to_addr=self.checksum_address,
-            zils=0,
+            zils=amount,
             nonce=nonce,
             gas_price=gas_price,
             gas_limit=gas_limit,
