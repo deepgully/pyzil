@@ -179,7 +179,7 @@ class TestAccount:
 
         batch = []
         total_zils = 0
-        for i in range(10):
+        for i in range(2):
             batch.append(BatchTransfer(to_account.checksum_address, Zil(i * 0.1)))
             total_zils += (i * 0.1)
 
@@ -190,10 +190,6 @@ class TestAccount:
 
         txn_infos = account.transfer_batch(batch)
         pprint(txn_infos)
-
-        txn_details = account.wait_txn_confirm(txn_infos[0]["TranID"], timeout=240)
-        pprint(txn_details)
-        assert txn_details
 
         for txn_info in txn_infos:
             if not txn_info:
