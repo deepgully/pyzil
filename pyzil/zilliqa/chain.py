@@ -113,6 +113,8 @@ TestNet = BlockChain("https://dev-api.zilliqa.com/",
 MainNet = BlockChain("https://api.zilliqa.com/",
                      version=65537, network_id=1)
 
+IsolatedServer = BlockChain("https://zilliqa-isolated-server.zilliqa.com/",
+                            version=65537, network_id=1)
 
 if "__main__" == __name__:
     print(TestNet.api.GetCurrentMiniEpoch())

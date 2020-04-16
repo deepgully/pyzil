@@ -85,8 +85,8 @@ class TestAccount:
 
     def test_balance(self):
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
-        print("set active chain to TestNet")
-        chain.set_active_chain(chain.TestNet)
+        print("set active chain to IsolatedServer")
+        chain.set_active_chain(chain.IsolatedServer)
         balance = account.get_balance()
         print("balance", balance)
         assert balance > 0
@@ -106,7 +106,7 @@ class TestAccount:
         assert balance > 0
 
     def test_transfer(self):
-        chain.set_active_chain(chain.TestNet)
+        chain.set_active_chain(chain.IsolatedServer)
 
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
         print(account)
@@ -149,8 +149,8 @@ class TestAccount:
         txn_info = account.transfer(account2.bech32_address, 10.3, confirm=True)
         pprint(txn_info)
 
-    def _test_batch_transfer(self):
-        chain.set_active_chain(chain.TestNet)
+    def test_batch_transfer(self):
+        chain.set_active_chain(chain.IsolatedServer)
 
         account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
         print(account)
@@ -213,8 +213,8 @@ class TestAccount:
         txn_info = account2.transfer(account.bech32_address, total_zils, confirm=True)
         pprint(txn_info)
 
-    def _test_transfer_qa(self):
-        chain.set_active_chain(chain.TestNet)
+    def test_transfer_qa(self):
+        chain.set_active_chain(chain.IsolatedServer)
 
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
         print(account)
@@ -240,8 +240,8 @@ class TestAccount:
         txn_info = account.transfer(account2.checksum_address, Qa(123456789), confirm=True)
         pprint(txn_info)
 
-    def _test_transfer_confirm(self):
-        chain.set_active_chain(chain.TestNet)
+    def test_transfer_confirm(self):
+        chain.set_active_chain(chain.IsolatedServer)
 
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
         print(account)

@@ -18,7 +18,7 @@ def path_join(*path):
 
 
 class TestAccount:
-    chain.set_active_chain(chain.TestNet)
+    chain.set_active_chain(chain.IsolatedServer)
 
     account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
 
@@ -39,7 +39,7 @@ class TestAccount:
         assert contract.status == Contract.Status.Deployed
 
     def test_from_address_hello(self):
-        address = "45dca9586598c8af78b191eaa28daf2b0a0b4f43"
+        address = "bd1143caf47101fd1172ff48fc98bdbba9b49fc8"
         contract = Contract.load_from_address(address, load_state=True)
         print(contract)
         pprint(contract.get_state(get_code=True, get_init=True))
@@ -49,7 +49,7 @@ class TestAccount:
         pprint(contract.state)
 
     def test_from_address_test(self):
-        address = "2d3195fbfbe0442556c9613e539a0b62a64f2402"
+        address = "c341f2767efc6bbfbeba0c830b8433addd1885f8"
         contract = Contract.load_from_address(address, load_state=True)
         print(contract)
         pprint(contract.get_state(get_code=True, get_init=True))
@@ -69,7 +69,7 @@ class TestAccount:
         assert contracts == contracts2
 
     def test_call(self):
-        contract = Contract.load_from_address("2d3195fbfbe0442556c9613e539a0b62a64f2402")
+        contract = Contract.load_from_address("c341f2767efc6bbfbeba0c830b8433addd1885f8")
         print(contract)
         contract.get_state(get_init=True, get_code=True)
         print(contract.status)
@@ -87,7 +87,7 @@ class TestAccount:
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == "Test Message"
 
     def test_call_hello(self):
-        contract = Contract.load_from_address("45dca9586598c8af78b191eaa28daf2b0a0b4f43")
+        contract = Contract.load_from_address("bd1143caf47101fd1172ff48fc98bdbba9b49fc8")
         print(contract)
         print(contract.status)
         print(contract.code)
@@ -121,7 +121,7 @@ class TestAccount:
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == "hi contract."
 
     def test_call_other_account(self):
-        contract = Contract.load_from_address("45dca9586598c8af78b191eaa28daf2b0a0b4f43")
+        contract = Contract.load_from_address("bd1143caf47101fd1172ff48fc98bdbba9b49fc8")
         print(contract)
         print(contract.status)
         print(contract.code)
