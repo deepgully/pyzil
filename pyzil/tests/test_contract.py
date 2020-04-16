@@ -34,7 +34,7 @@ class TestAccount:
             contract.deploy()
 
         contract.account = self.account
-        contract.deploy(timeout=300, sleep=10)
+        contract.deploy(timeout=300, sleep=10, gas_price=1000000000)
         print(contract)
         assert contract.status == Contract.Status.Deployed
 
@@ -79,7 +79,7 @@ class TestAccount:
 
         contract.account = self.account
 
-        resp = contract.call(method="getMessage", params=[])
+        resp = contract.call(gas_price=1000000000, method="getMessage", params=[])
         print(resp)
         pprint(contract.last_receipt)
         assert contract.last_receipt["success"]
@@ -96,14 +96,14 @@ class TestAccount:
 
         contract.account = self.account
 
-        resp = contract.call(method="contrAddr", params=[])
+        resp = contract.call(gas_price=1000000000, method="contrAddr", params=[])
         print(resp)
         pprint(contract.last_receipt)
         assert contract.last_receipt["success"]
         assert contract.last_receipt["event_logs"][0]["params"][0]["vname"] == "addr"
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == contract.address0x
 
-        resp = contract.call(method="setHello", params=[Contract.value_dict("msg", "String", "hi contract.")])
+        resp = contract.call(gas_price=1000000000, method="setHello", params=[Contract.value_dict("msg", "String", "hi contract.")])
         print(resp)
         pprint(contract.last_receipt)
         assert contract.last_receipt["success"]
@@ -111,7 +111,7 @@ class TestAccount:
         assert contract.last_receipt["event_logs"][0]["params"][0]["type"] == "Int32"
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == "2"
 
-        resp = contract.call(method="getHello", params=[])
+        resp = contract.call(gas_price=1000000000, method="getHello", params=[])
         print(resp)
         pprint(contract.last_receipt)
         assert contract.last_receipt["success"]
@@ -133,7 +133,7 @@ class TestAccount:
 
         contract.account = account2
 
-        resp = contract.call(method="setHello", params=[
+        resp = contract.call(gas_price=1000000000, method="setHello", params=[
             Contract.value_dict("msg", "String", "hello from another account")
         ])
         print(resp)
@@ -142,7 +142,7 @@ class TestAccount:
         assert contract.last_receipt["event_logs"][0]["params"][0]["vname"] == "code"
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == "1"
 
-        resp = contract.call(method="getHello", params=[])
+        resp = contract.call(gas_price=1000000000, method="getHello", params=[])
         print(resp)
         pprint(contract.last_receipt)
         assert contract.last_receipt["success"]
