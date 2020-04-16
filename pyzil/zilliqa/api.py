@@ -47,6 +47,7 @@ class ZilliqaAPI:
             try:
                 return self.api_client.request(
                     method_name, *_params,
+                    request_id="1",
                     trim_log_values=True, **kwargs
                 )
             except JsonRpcClientError as _e:

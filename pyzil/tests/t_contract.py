@@ -3,7 +3,6 @@
 # Copyright (C) 2019  Gully Chen
 # MIT License
 
-import time
 import pytest
 from pprint import pprint
 
@@ -18,7 +17,7 @@ def path_join(*path):
     return os.path.join(cur_dir, *path)
 
 
-class TestAccount:
+class TestContract:
     chain.set_active_chain(chain.IsolatedServer)
     contracts = {
         "hello": "bd1143caf47101fd1172ff48fc98bdbba9b49fc8",
@@ -27,7 +26,7 @@ class TestAccount:
 
     account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
 
-    def test_new_contract(self):
+    def _test_new_contract(self):
         print("Account balance1", self.account.get_balance())
 
         code = open(path_join("contracts", "HelloWorld.scilla")).read()
@@ -38,7 +37,6 @@ class TestAccount:
         with pytest.raises(ValueError, match=".+set account.+"):
             contract.deploy()
 
-        time.sleep(0.5)
         contract.account = self.account
         contract.deploy(timeout=300, sleep=10, gas_price=1000000000)
         print(contract)
@@ -47,10 +45,8 @@ class TestAccount:
 
     def test_from_address_hello(self):
         address = self.contracts["hello"]
-        time.sleep(0.5)
         contract = Contract.load_from_address(address, load_state=True)
         print(contract)
-        time.sleep(0.5)
         pprint(contract.get_state(get_code=True, get_init=False))
         print(contract.status)
         print(contract.code)
@@ -59,10 +55,8 @@ class TestAccount:
 
     def test_from_address_test(self):
         address = self.contracts["test"]
-        time.sleep(0.5)
         contract = Contract.load_from_address(address, load_state=True)
         print(contract)
-        time.sleep(0.5)
         pprint(contract.get_state(get_code=True, get_init=False))
         print(contract.status)
         print(contract.code)
@@ -71,11 +65,9 @@ class TestAccount:
 
     def test_get_contracts(self):
         owner_addr = self.account.address
-        time.sleep(0.5)
         contracts = Contract.get_contracts(owner_addr)
         pprint(contracts)
 
-        time.sleep(0.5)
         contracts2 = self.account.get_contracts()
         pprint(contracts2)
 
@@ -83,17 +75,14 @@ class TestAccount:
 
     def test_call(self):
         address = self.contracts["test"]
-        time.sleep(0.5)
         contract = Contract.load_from_address(address)
         print(contract)
-        time.sleep(0.5)
         contract.get_state(get_init=True, get_code=False)
         print(contract.status)
         pprint(contract.init)
         pprint(contract.state)
 
         contract.account = self.account
-        time.sleep(0.5)
         resp = contract.call(gas_price=1000000000, method="getMessage", params=[])
         print(resp)
         pprint(contract.last_receipt)
@@ -103,14 +92,12 @@ class TestAccount:
 
     def test_call_hello(self):
         address = self.contracts["hello"]
-        time.sleep(0.5)
         contract = Contract.load_from_address(address)
         print(contract)
         print(contract.status)
         pprint(contract.state)
 
         contract.account = self.account
-        time.sleep(0.5)
         resp = contract.call(gas_price=1000000000, method="contrAddr", params=[])
         print(resp)
         pprint(contract.last_receipt)
@@ -118,7 +105,6 @@ class TestAccount:
         assert contract.last_receipt["event_logs"][0]["params"][0]["vname"] == "addr"
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == contract.address0x
 
-        time.sleep(0.5)
         resp = contract.call(gas_price=1000000000, method="setHello", params=[Contract.value_dict("msg", "String", "hi contract.")])
         print(resp)
         pprint(contract.last_receipt)
@@ -127,7 +113,6 @@ class TestAccount:
         assert contract.last_receipt["event_logs"][0]["params"][0]["type"] == "Int32"
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == "2"
 
-        time.sleep(0.5)
         resp = contract.call(gas_price=1000000000, method="getHello", params=[])
         print(resp)
         pprint(contract.last_receipt)
@@ -139,7 +124,6 @@ class TestAccount:
 
     def test_call_other_account(self):
         address = self.contracts["hello"]
-        time.sleep(0.5)
         contract = Contract.load_from_address(address)
         print(contract)
         print(contract.status)
@@ -148,7 +132,6 @@ class TestAccount:
         print("Account2 balance", account2.get_balance())
 
         contract.account = account2
-        time.sleep(0.5)
         resp = contract.call(gas_price=1000000000, method="setHello", params=[
             Contract.value_dict("msg", "String", "hello from another account")
         ])
@@ -158,7 +141,6 @@ class TestAccount:
         assert contract.last_receipt["event_logs"][0]["params"][0]["vname"] == "code"
         assert contract.last_receipt["event_logs"][0]["params"][0]["value"] == "1"
 
-        time.sleep(0.5)
         resp = contract.call(gas_price=1000000000, method="getHello", params=[])
         print(resp)
         pprint(contract.last_receipt)

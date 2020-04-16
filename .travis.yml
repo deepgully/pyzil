@@ -7,7 +7,9 @@ install:
   - pip install -r requirements.txt
   - python setup.py install
 
-script: pytest
+script:
+  - pytest
+  - pytest pyzil/tests/t_contract.py
 
 deploy:
   provider: pypi
