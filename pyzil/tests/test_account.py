@@ -24,6 +24,9 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 
 class TestAccount:
+    def setup_method(self, method):
+        chain.set_active_chain(chain.IsolatedServer)
+
     def test_new_account(self):
         with pytest.raises(ValueError):
             Account()
@@ -85,8 +88,7 @@ class TestAccount:
 
     def test_balance(self):
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
-        print("set active chain to IsolatedServer")
-        chain.set_active_chain(chain.IsolatedServer)
+
         balance = account.get_balance()
         print("balance", balance)
         assert balance > 0
@@ -106,8 +108,6 @@ class TestAccount:
         assert balance > 0
 
     def test_transfer(self):
-        chain.set_active_chain(chain.IsolatedServer)
-
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
         print(account)
         balance1 = account.get_balance()
@@ -150,8 +150,6 @@ class TestAccount:
         pprint(txn_info)
 
     def test_batch_transfer(self):
-        chain.set_active_chain(chain.IsolatedServer)
-
         account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
         print(account)
         balance = account.get_balance()
@@ -210,8 +208,6 @@ class TestAccount:
         pprint(txn_info)
 
     def test_transfer_qa(self):
-        chain.set_active_chain(chain.IsolatedServer)
-
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
         print(account)
         print("Account1 balance", repr(account.get_balance()))
@@ -237,8 +233,6 @@ class TestAccount:
         pprint(txn_info)
 
     def test_transfer_confirm(self):
-        chain.set_active_chain(chain.IsolatedServer)
-
         account = Account(address="b50c2404e699fd985f71b2c3f032059f13d6543b")
         print(account)
         balance1 = account.get_balance()

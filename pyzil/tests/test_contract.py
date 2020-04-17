@@ -18,7 +18,6 @@ def path_join(*path):
 
 
 class TestContract:
-    chain.set_active_chain(chain.IsolatedServer)
     contracts = {
         "hello": "bd1143caf47101fd1172ff48fc98bdbba9b49fc8",
         "test": "c341f2767efc6bbfbeba0c830b8433addd1885f8",
@@ -26,7 +25,11 @@ class TestContract:
 
     account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
 
-    def _test_new_contract(self):
+    def setup_method(self, method):
+        print("set active chain to IsolatedServer")
+        chain.set_active_chain(chain.IsolatedServer)
+
+    def test_new_contract(self):
         print("Account balance1", self.account.get_balance())
 
         code = open(path_join("contracts", "HelloWorld.scilla")).read()

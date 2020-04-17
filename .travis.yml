@@ -9,7 +9,6 @@ install:
 
 script:
   - pytest
-  - pytest pyzil/tests/t_contract.py
 
 deploy:
   provider: pypi
