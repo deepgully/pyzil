@@ -14,7 +14,7 @@ Python 3.6+ on macOS or Linux.
 ## Install
 
 ```shell
-pip install pyzil
+pip install -U pyzil
 ```
 or from source
 ```shell
@@ -40,6 +40,8 @@ from pyzil.account import Account, BatchTransfer
 #### Set Active Chain, MainNet or TestNet
 ```python
 chain.set_active_chain(chain.MainNet)  
+chain.set_active_chain(chain.TestNet)  
+chain.set_active_chain(chain.IsolatedServer)  
 ```  
 
 #### ZILs Transaction
@@ -272,7 +274,11 @@ print(contract)
 # set account before deploy
 contract.account = account
 
-contract.deploy(timeout=300, sleep=10)
+init = [
+    Contract.value_dict("_scilla_version", "Uint32", "0"),
+    Contract.value_dict("owner", "ByStr20", account.address0x)
+]
+contract.deploy(init_params=init, timeout=300, sleep=10)
 assert contract.status == Contract.Status.Deployed
 ```
 

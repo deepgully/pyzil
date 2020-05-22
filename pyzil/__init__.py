@@ -26,4 +26,4 @@ usage:
 :license: MIT License, see LICENSE for more details.
 """
 
-version = "1.4.16"
+version = "1.5.22"
