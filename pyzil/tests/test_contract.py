@@ -19,11 +19,16 @@ def path_join(*path):
 
 class TestContract:
     contracts = {
-        "hello": "bd1143caf47101fd1172ff48fc98bdbba9b49fc8",
-        "test": "c341f2767efc6bbfbeba0c830b8433addd1885f8",
+        "hello": "c341f2767efc6bbfbeba0c830b8433addd1885f8",
+        "test": "9411679c08c025ccde8865b5ebe301b899c02bef",
     }
 
     account = Account.from_keystore("zxcvbnm,", path_join("crypto", "zilliqa_keystore.json"))
+
+    init = [
+        Contract.value_dict("_scilla_version", "Uint32", "0"),
+        Contract.value_dict("owner", "ByStr20", account.address0x)
+    ]
 
     def setup_method(self, method):
         print("set active chain to IsolatedServer")
@@ -41,7 +46,7 @@ class TestContract:
             contract.deploy()
 
         contract.account = self.account
-        contract.deploy(timeout=300, sleep=10, gas_price=1000000000)
+        contract.deploy(init_params=self.init, timeout=300, sleep=10, gas_price=1000000000)
         print(contract)
         print("Account balance2", self.account.get_balance())
         assert contract.status == Contract.Status.Deployed

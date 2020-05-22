@@ -128,20 +128,19 @@ class Contract:
 
     def deploy(self, init_params: Optional[List[Dict]]=None,
                nonce: Optional[int]=None,
-               gas_price: Optional[int]=None, gas_limit=10000, priority=False,
+               gas_price: Optional[int]=None, gas_limit=10000, priority=True,
                confirm=True, timeout=300, sleep=10) -> Optional[Dict]:
         assert self.code, "invalid contract code"
 
         if self.address or self.status == Contract.Status.Deployed:
             raise ValueError("contract had deployed already")
 
-        init_list = [
-            Contract.value_dict("_scilla_version", "Uint32", "0"),
-            Contract.value_dict("owner", "ByStr20", self.account.address0x),
-        ]
-        if init_params is not None:
-            init_list += init_params
-        self.init = init_list
+        if not init_params:
+            init_params = [
+                Contract.value_dict("_scilla_version", "Uint32", "0")
+            ]
+
+        self.init = init_params
 
         txn_info = self.account.transfer(
             to_addr=Contract.DEPLOY_ADDRESS,
