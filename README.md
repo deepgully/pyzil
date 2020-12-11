@@ -41,7 +41,13 @@ from pyzil.account import Account, BatchTransfer
 ```python
 chain.set_active_chain(chain.MainNet)  
 chain.set_active_chain(chain.TestNet)  
-chain.set_active_chain(chain.IsolatedServer)  
+chain.set_active_chain(chain.IsolatedServer)
+
+# set a seed API server
+SeedNode = chain.BlockChain(
+    "https://seed-api.zillab.com/",
+    version=65537, network_id=1)     
+chain.set_active_chain(SeedNode)
 ```  
 
 #### ZILs Transaction
