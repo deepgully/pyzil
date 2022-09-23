@@ -2,7 +2,7 @@ Click==7.0
 eth-hash==0.2.0
 fastecdsa==2.1.2
 jsonrpcclient==3.3.5
-protobuf==3.11.3
+protobuf==3.18.3
 pycryptodome==3.9.7
 pyethash==0.1.27
 requests==2.23.0
